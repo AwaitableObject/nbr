@@ -2,7 +2,7 @@ from typing import Dict
 
 import httpx
 
-from nbrunner.settings import JUPYTER_BASE_URL
+from nbr.settings import JUPYTER_BASE_URL
 
 
 async def get_contents(path: str) -> Dict:

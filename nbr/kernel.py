@@ -1,16 +1,14 @@
-import asyncio
 import json
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Dict, Optional, Union
 from uuid import uuid4
 
 import httpx
 from websockets.legacy.client import WebSocketClientProtocol, connect
 
-from nbrunner.schemas import CreateSession, Session
-from nbrunner.settings import JUPYTER_BASE_URL, JUPYTER_WS_URL
+from nbr.schemas.message import Content, Header, Message, Metadata
+from nbr.schemas.session import CreateSession, Session
+from nbr.settings import JUPYTER_BASE_URL, JUPYTER_WS_URL
 
-executed = []
 
 async def create_session(session: CreateSession) -> Session:
     """Create a new session."""
@@ -26,8 +24,8 @@ def create_message(
     channel: str,
     message_type: str,
     session: str,
-    content: Optional[dict] = None,
-    metadata: Optional[dict] = None,
+    content: Optional[Union[Content, dict]] = None,
+    metadata: Optional[Union[Metadata, dict]] = None,
 ) -> Dict:
     """Generate a message using a template."""
     if content is None:
@@ -36,31 +34,29 @@ def create_message(
     if metadata is None:
         metadata = {}
 
-    message = {
+    header = Header(msg_type=message_type, session=session)
+
+    message_data = {
         "buffers": [],
         "channel": channel,
+        "header": header,
         "content": content,
-        "header": {
-            "date": str(datetime.utcnow().replace(tzinfo=timezone.utc)),
-            "msg_id": uuid4().hex,
-            "msg_type": message_type,
-            "session": session,
-            "username": "",
-            "version": "5.2",
-        },
         "metadata": metadata,
         "parent_header": {},
     }
-    return message
+
+    message = Message(**message_data)
+    print(message.dict())
+
+    return message.dict()
 
 
 class KernelDriver:
     """Kernel driver class."""
 
-    def __init__(self, session_name: str, cells, session_type: str = "notebook") -> None:
+    def __init__(self, session_name: str, session_type: str = "notebook") -> None:
         """Init then kernel driver."""
         self.kernel_name = "python3"
-        self.cells = cells
 
         self.session: Session
         self.websocket: WebSocketClientProtocol
@@ -70,6 +66,7 @@ class KernelDriver:
 
     async def start(self) -> None:
         """Run a kernel."""
+
         session_json = {
             "kernel": {"name": self.kernel_name},
             "name": str(self.session_name),
@@ -78,8 +75,8 @@ class KernelDriver:
         }
 
         self.session = await create_session(CreateSession(**session_json))
-        await self.create_kernel_channel()     
-        
+        await self.create_kernel_channel()
+
         for _ in range(5):
             await self.websocket.recv()
 
@@ -90,7 +87,11 @@ class KernelDriver:
         url = f"{JUPYTER_WS_URL}/kernels/{kernel_id}/channels?session_id={session_id}"
 
         message = create_message(
-            channel="shell", message_type="kernel_info_request", session=self.session.id
+            channel="shell",
+            message_type="kernel_info_request",
+            session=self.session.id,
+            content=Content(),
+            metadata=Metadata(),
         )
 
         self.websocket = await connect(url)
@@ -110,25 +111,12 @@ class KernelDriver:
 
         code = cell["source"]
 
-        content = {
-            "allow_stdin": False,
-            "code": code,
-            "silent": False,
-            "stop_on_error": True,
-            "store_history": True,
-            "user_expressions": {},
-        }
-        metadata = {
-            "cellId": uuid4().hex,
-            "deletedCells": [],
-            "recordTiming": False,
-        }
         message = create_message(
             channel="shell",
             message_type="execute_request",
             session=self.session.id,
-            content=content,
-            metadata=metadata,
+            content=Content(code=code),
+            metadata=Metadata(),
         )
 
         message_json = json.dumps(message)
@@ -136,4 +124,3 @@ class KernelDriver:
         for _ in range(2):
             msg = await self.websocket.recv()
             print(msg)
-        
