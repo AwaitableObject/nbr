@@ -34,13 +34,13 @@ class Session(BaseModel):
 class KernelName(BaseModel):
     """Kernel name scheme."""
 
-    name: str
+    name: str = "python3"
 
 
 class CreateSession(BaseModel):
     """Session scheme."""
 
-    kernel: KernelName
+    kernel: KernelName = KernelName()
     name: str
     path: str
-    type: str
+    type: str = "notebook"

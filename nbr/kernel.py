@@ -37,16 +37,13 @@ def create_message(
     header = Header(msg_type=message_type, session=session)
 
     message_data = {
-        "buffers": [],
         "channel": channel,
         "header": header,
         "content": content,
         "metadata": metadata,
-        "parent_header": {},
     }
 
     message = Message(**message_data)
-    print(message.dict())
 
     return message.dict()
 
@@ -54,31 +51,33 @@ def create_message(
 class KernelDriver:
     """Kernel driver class."""
 
-    def __init__(self, session_name: str, session_type: str = "notebook") -> None:
+    def __init__(self, session_name: str) -> None:
         """Init then kernel driver."""
+        self._running = False
+        self._websocket: WebSocketClientProtocol
+
         self.kernel_name = "python3"
 
         self.session: Session
-        self.websocket: WebSocketClientProtocol
         self.session_name = session_name
         self.session_path = uuid4().hex
-        self.session_type = session_type
+
+    @property
+    def running(self) -> bool:
+        return self._running
 
     async def start(self) -> None:
         """Run a kernel."""
 
         session_json = {
-            "kernel": {"name": self.kernel_name},
             "name": str(self.session_name),
             "path": self.session_path,
-            "type": self.session_type,
         }
 
         self.session = await create_session(CreateSession(**session_json))
         await self.create_kernel_channel()
 
-        for _ in range(5):
-            await self.websocket.recv()
+        self._running = True
 
     async def create_kernel_channel(self) -> None:
         """Create new kernel channel."""
@@ -94,33 +93,19 @@ class KernelDriver:
             metadata=Metadata(),
         )
 
-        self.websocket = await connect(url)
-        await self.websocket.send(json.dumps(message))
-        await self.websocket.recv()
+        self._websocket = await connect(url)
+        await self._websocket.send(json.dumps(message))
+        await self._websocket.recv()
 
     async def stop(self) -> None:
         """Stop a kernel."""
-        await self.websocket.close()
+        await self._websocket.close()
 
         url = f"{JUPYTER_BASE_URL}/sessions/{self.session.id}"
         async with httpx.AsyncClient() as client:
             await client.delete(url)
 
+        self._running = False
+
     async def execute(self, cell: dict) -> None:
         """Execute the cell."""
-
-        code = cell["source"]
-
-        message = create_message(
-            channel="shell",
-            message_type="execute_request",
-            session=self.session.id,
-            content=Content(code=code),
-            metadata=Metadata(),
-        )
-
-        message_json = json.dumps(message)
-        await self.websocket.send(message_json)
-        for _ in range(2):
-            msg = await self.websocket.recv()
-            print(msg)

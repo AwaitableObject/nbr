@@ -13,7 +13,7 @@ class Metadata(BaseModel):
 
 class Content(BaseModel):
     allow_stdin: bool = False
-    code: dict
+    code: dict = {}
     silent: bool = False
     stop_on_error: bool = True
     store_history: bool = True
