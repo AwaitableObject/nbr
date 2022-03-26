@@ -1,2 +1,2 @@
-# jupyter-launcher
-Remote jupyter notebooks launcher
+# nbrunner
+Remote jupyter notebooks runner
