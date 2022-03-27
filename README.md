@@ -14,8 +14,20 @@ Launch a Jupyter server:
 jupyter server --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True
 ```
 
-Execute a notebook through that server:
+Run a notebook on this server:
 
-```
-nbr --server http://127.0.0.1:8888 --run work/Untitled.ipynb
+
+```python
+import asyncio
+from nbr import JupyterNotebook
+
+async def main() -> None:
+    nb = JupyterNotebook("Untitled.ipynb")
+    
+    await nb.open()
+    await nb.run_all_cells()
+    await nb.close()
+    
+if __name__ == "__main__":
+    asyncio.run(main())
 ```

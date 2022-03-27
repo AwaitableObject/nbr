@@ -1,6 +1,6 @@
 from websockets.legacy.client import WebSocketClientProtocol, connect
 
-from nbr.config import Config
+from nbr.config import config
 from nbr.schemas.message import Content, Metadata
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.messages import create_message
@@ -33,7 +33,7 @@ class KernelDriver:
         """Create new kernel channel."""
         kernel_id = self.session.kernel.id
         session_id = self.session.id
-        url = f"{Config.ws_url}/kernels/{kernel_id}/channels?session_id={session_id}"
+        url = f"{config.ws_url}/kernels/{kernel_id}/channels?session_id={session_id}"
 
         message = create_message(
             channel="shell",
@@ -45,7 +45,7 @@ class KernelDriver:
 
         self._websocket = await connect(url)
         await self._websocket.send(message)
-        await self._websocket.recv()
+        # await self._websocket.recv()
 
     async def stop(self) -> None:
         """Stop a kernel."""
@@ -56,3 +56,5 @@ class KernelDriver:
 
     async def execute(self, cell: dict) -> None:
         """Execute the cell."""
+        code = cell["source"]
+        self._websocket.send(code)

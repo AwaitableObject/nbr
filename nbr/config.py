@@ -9,8 +9,11 @@ class Config:
     @property
     def ws_url(self) -> str:
         return f"ws://{Config.host}:{Config.port}/api"
-    
+
     @staticmethod
     def configure(host: str, port: int) -> None:
         Config.host = host
         Config.port = port
+
+
+config = Config()
