@@ -1,80 +1,28 @@
-import json
-from typing import Dict, Optional, Union
-from uuid import uuid4
-
-import httpx
 from websockets.legacy.client import WebSocketClientProtocol, connect
 
-from nbr.schemas.message import Content, Header, Message, Metadata
+from nbr.config import config
+from nbr.schemas.message import Content
 from nbr.schemas.session import CreateSession, Session
-from nbr.settings import JUPYTER_BASE_URL, JUPYTER_WS_URL
-
-
-async def create_session(session: CreateSession) -> Session:
-    """Create a new session."""
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{JUPYTER_BASE_URL}/sessions", json=session.dict()
-        )
-
-    return Session(**response.json())
-
-
-def create_message(
-    channel: str,
-    message_type: str,
-    session: str,
-    content: Optional[Union[Content, dict]] = None,
-    metadata: Optional[Union[Metadata, dict]] = None,
-) -> Dict:
-    """Generate a message using a template."""
-    if content is None:
-        content = {}
-
-    if metadata is None:
-        metadata = {}
-
-    header = Header(msg_type=message_type, session=session)
-
-    message_data = {
-        "channel": channel,
-        "header": header,
-        "content": content,
-        "metadata": metadata,
-    }
-
-    message = Message(**message_data)
-
-    return message.dict()
+from nbr.utils.messages import create_message
+from nbr.utils.sessions import create_session, delete_session
 
 
 class KernelDriver:
     """Kernel driver class."""
 
-    def __init__(self, session_name: str) -> None:
+    def __init__(self) -> None:
         """Init then kernel driver."""
         self._running = False
         self._websocket: WebSocketClientProtocol
-
-        self.kernel_name = "python3"
-
         self.session: Session
-        self.session_name = session_name
-        self.session_path = uuid4().hex
 
     @property
     def running(self) -> bool:
         return self._running
 
-    async def start(self) -> None:
+    async def start(self, session_name: str) -> None:
         """Run a kernel."""
-
-        session_json = {
-            "name": str(self.session_name),
-            "path": self.session_path,
-        }
-
-        self.session = await create_session(CreateSession(**session_json))
+        self.session = await create_session(CreateSession(name=session_name))
         await self.create_kernel_channel()
 
         self._running = True
@@ -83,29 +31,29 @@ class KernelDriver:
         """Create new kernel channel."""
         kernel_id = self.session.kernel.id
         session_id = self.session.id
-        url = f"{JUPYTER_WS_URL}/kernels/{kernel_id}/channels?session_id={session_id}"
-
-        message = create_message(
-            channel="shell",
-            message_type="kernel_info_request",
-            session=self.session.id,
-            content=Content(),
-            metadata=Metadata(),
-        )
+        url = f"{config.ws_url}/kernels/{kernel_id}/channels?session_id={session_id}"
 
         self._websocket = await connect(url)
-        await self._websocket.send(json.dumps(message))
-        await self._websocket.recv()
 
     async def stop(self) -> None:
         """Stop a kernel."""
         await self._websocket.close()
-
-        url = f"{JUPYTER_BASE_URL}/sessions/{self.session.id}"
-        async with httpx.AsyncClient() as client:
-            await client.delete(url)
+        await delete_session(self.session.id)
 
         self._running = False
 
     async def execute(self, cell: dict) -> None:
         """Execute the cell."""
+        code = cell["source"]
+
+        content = Content(code=code)
+        message = create_message(
+            channel="shell",
+            msg_type="execute_request",
+            session=self.session.name,
+            content=content,
+        )
+
+        await self._websocket.send(message)
+        for _ in range(4):
+            await self._websocket.recv()

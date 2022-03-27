@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "nbr"
-version = "0.1.0"
+version = "0.1.0b"
 description = "Remote jupyter notebooks runner"
 authors = ["zhivykh"]
+readme = "README.md"
+homepage = "https://github.com/zhivykh/nbr"
+repository = "https://github.com/zhivykh/nbr"
+keywords = ["jupyter"]
 
 [tool.poetry.dependencies]
 python = "^3.9"

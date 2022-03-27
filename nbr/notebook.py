@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
-from nbr.contents import get_contents
 from nbr.kernel import KernelDriver
+from nbr.utils.contents import get_contents
 
 
 class JupyterNotebook:
@@ -11,14 +11,11 @@ class JupyterNotebook:
         """Init notebook."""
         self.name = name
         self.cells: List[dict] = []
-        self._kernel_driver = KernelDriver(session_name=self.name)
+        self._kernel_driver = KernelDriver()
         self._content: Dict[str, Any] = {}
 
     @property
     async def content(self) -> dict:
-        if not self._content:
-            await self.open()
-
         return self._content
 
     async def open(self) -> None:
@@ -27,15 +24,14 @@ class JupyterNotebook:
         self._content = notebook_contents["content"]
         self.cells = self._content["cells"]
 
+        if not self._kernel_driver.running:
+            await self._kernel_driver.start(session_name=self.name)
+
     async def run_all_cells(self) -> None:
         """Run all cells."""
 
-        if not self._kernel_driver.running:
-            self._kernel_driver.start()
-
         for cell in self.cells:
-            res = await self._kernel_driver.execute(cell)
-            print(res)
+            await self._kernel_driver.execute(cell)
 
     async def close(self) -> None:
         """Close kernel."""

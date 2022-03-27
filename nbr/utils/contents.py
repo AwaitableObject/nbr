@@ -2,12 +2,13 @@ from typing import Dict
 
 import httpx
 
-from nbr.settings import JUPYTER_BASE_URL
+from nbr.config import config
 
 
 async def get_contents(path: str) -> Dict:
     """Get content by path."""
-    url = f"{JUPYTER_BASE_URL}/contents{path}"
+    url = f"{config.api_url}/contents{path}"
+    print(url)
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
