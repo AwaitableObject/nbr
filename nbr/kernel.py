@@ -1,23 +1,12 @@
 import json
 from typing import Dict, Optional, Union
-from uuid import uuid4
 
-import httpx
 from websockets.legacy.client import WebSocketClientProtocol, connect
 
 from nbr.schemas.message import Content, Header, Message, Metadata
 from nbr.schemas.session import CreateSession, Session
-from nbr.settings import JUPYTER_BASE_URL, JUPYTER_WS_URL
-
-
-async def create_session(session: CreateSession) -> Session:
-    """Create a new session."""
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            f"{JUPYTER_BASE_URL}/sessions", json=session.dict()
-        )
-
-    return Session(**response.json())
+from nbr.settings import JUPYTER_WS_URL
+from nbr.utils.sessions import create_session, delete_session
 
 
 def create_message(
@@ -55,12 +44,9 @@ class KernelDriver:
         """Init then kernel driver."""
         self._running = False
         self._websocket: WebSocketClientProtocol
-
-        self.kernel_name = "python3"
-
         self.session: Session
+
         self.session_name = session_name
-        self.session_path = uuid4().hex
 
     @property
     def running(self) -> bool:
@@ -68,13 +54,7 @@ class KernelDriver:
 
     async def start(self) -> None:
         """Run a kernel."""
-
-        session_json = {
-            "name": str(self.session_name),
-            "path": self.session_path,
-        }
-
-        self.session = await create_session(CreateSession(**session_json))
+        self.session = await create_session(CreateSession(name=self.session_name))
         await self.create_kernel_channel()
 
         self._running = True
@@ -100,10 +80,7 @@ class KernelDriver:
     async def stop(self) -> None:
         """Stop a kernel."""
         await self._websocket.close()
-
-        url = f"{JUPYTER_BASE_URL}/sessions/{self.session.id}"
-        async with httpx.AsyncClient() as client:
-            await client.delete(url)
+        await delete_session(self.session.id)
 
         self._running = False
 

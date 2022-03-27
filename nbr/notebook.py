@@ -1,7 +1,7 @@
 from typing import Any, Dict, List
 
-from nbr.contents import get_contents
 from nbr.kernel import KernelDriver
+from nbr.utils.contents import get_contents
 
 
 class JupyterNotebook:
