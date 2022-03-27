@@ -1,7 +1,7 @@
 from websockets.legacy.client import WebSocketClientProtocol, connect
 
 from nbr.config import config
-from nbr.schemas.message import Content, Metadata
+from nbr.schemas.message import Content
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.messages import create_message
 from nbr.utils.sessions import create_session, delete_session
@@ -10,21 +10,19 @@ from nbr.utils.sessions import create_session, delete_session
 class KernelDriver:
     """Kernel driver class."""
 
-    def __init__(self, session_name: str) -> None:
+    def __init__(self) -> None:
         """Init then kernel driver."""
         self._running = False
         self._websocket: WebSocketClientProtocol
         self.session: Session
 
-        self.session_name = session_name
-
     @property
     def running(self) -> bool:
         return self._running
 
-    async def start(self) -> None:
+    async def start(self, session_name: str) -> None:
         """Run a kernel."""
-        self.session = await create_session(CreateSession(name=self.session_name))
+        self.session = await create_session(CreateSession(name=session_name))
         await self.create_kernel_channel()
 
         self._running = True
@@ -35,17 +33,7 @@ class KernelDriver:
         session_id = self.session.id
         url = f"{config.ws_url}/kernels/{kernel_id}/channels?session_id={session_id}"
 
-        message = create_message(
-            channel="shell",
-            msg_type="kernel_info_request",
-            session=self.session.id,
-            content=Content(),
-            metadata=Metadata(),
-        )
-
         self._websocket = await connect(url)
-        await self._websocket.send(message)
-        # await self._websocket.recv()
 
     async def stop(self) -> None:
         """Stop a kernel."""
@@ -57,4 +45,15 @@ class KernelDriver:
     async def execute(self, cell: dict) -> None:
         """Execute the cell."""
         code = cell["source"]
-        self._websocket.send(code)
+
+        content = Content(code=code)
+        message = create_message(
+            channel="shell",
+            msg_type="execute_request",
+            session=self.session.name,
+            content=content,
+        )
+
+        await self._websocket.send(message)
+        for _ in range(4):
+            await self._websocket.recv()

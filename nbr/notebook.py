@@ -11,7 +11,7 @@ class JupyterNotebook:
         """Init notebook."""
         self.name = name
         self.cells: List[dict] = []
-        self._kernel_driver = KernelDriver(session_name=self.name)
+        self._kernel_driver = KernelDriver()
         self._content: Dict[str, Any] = {}
 
     @property
@@ -23,16 +23,15 @@ class JupyterNotebook:
         notebook_contents = await get_contents(f"/work/{self.name}")
         self._content = notebook_contents["content"]
         self.cells = self._content["cells"]
-        
+
         if not self._kernel_driver.running:
-            await self._kernel_driver.start()
+            await self._kernel_driver.start(session_name=self.name)
 
     async def run_all_cells(self) -> None:
         """Run all cells."""
 
         for cell in self.cells:
-            res = await self._kernel_driver.execute(cell)
-            print(res)
+            await self._kernel_driver.execute(cell)
 
     async def close(self) -> None:
         """Close kernel."""
