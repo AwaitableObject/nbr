@@ -13,12 +13,10 @@ class JupyterNotebook:
         self.cells: List[dict] = []
         self._kernel_driver = KernelDriver(session_name=self.name)
         self._content: Dict[str, Any] = {}
+        self._oppended = False
 
     @property
     async def content(self) -> dict:
-        if not self._content:
-            await self.open()
-
         return self._content
 
     async def open(self) -> None:
@@ -31,7 +29,7 @@ class JupyterNotebook:
         """Run all cells."""
 
         if not self._kernel_driver.running:
-            self._kernel_driver.start()
+            await self._kernel_driver.start()
 
         for cell in self.cells:
             res = await self._kernel_driver.execute(cell)

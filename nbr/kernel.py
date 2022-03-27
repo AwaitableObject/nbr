@@ -1,40 +1,10 @@
-import json
-from typing import Dict, Optional, Union
-
 from websockets.legacy.client import WebSocketClientProtocol, connect
 
-from nbr.schemas.message import Content, Header, Message, Metadata
+from nbr.config import Config
+from nbr.schemas.message import Content, Metadata
 from nbr.schemas.session import CreateSession, Session
-from nbr.settings import JUPYTER_WS_URL
+from nbr.utils.messages import create_message
 from nbr.utils.sessions import create_session, delete_session
-
-
-def create_message(
-    channel: str,
-    message_type: str,
-    session: str,
-    content: Optional[Union[Content, dict]] = None,
-    metadata: Optional[Union[Metadata, dict]] = None,
-) -> Dict:
-    """Generate a message using a template."""
-    if content is None:
-        content = {}
-
-    if metadata is None:
-        metadata = {}
-
-    header = Header(msg_type=message_type, session=session)
-
-    message_data = {
-        "channel": channel,
-        "header": header,
-        "content": content,
-        "metadata": metadata,
-    }
-
-    message = Message(**message_data)
-
-    return message.dict()
 
 
 class KernelDriver:
@@ -63,18 +33,18 @@ class KernelDriver:
         """Create new kernel channel."""
         kernel_id = self.session.kernel.id
         session_id = self.session.id
-        url = f"{JUPYTER_WS_URL}/kernels/{kernel_id}/channels?session_id={session_id}"
+        url = f"{Config.ws_url}/kernels/{kernel_id}/channels?session_id={session_id}"
 
         message = create_message(
             channel="shell",
-            message_type="kernel_info_request",
+            msg_type="kernel_info_request",
             session=self.session.id,
             content=Content(),
             metadata=Metadata(),
         )
 
         self._websocket = await connect(url)
-        await self._websocket.send(json.dumps(message))
+        await self._websocket.send(message)
         await self._websocket.recv()
 
     async def stop(self) -> None:
