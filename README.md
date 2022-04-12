@@ -1,4 +1,4 @@
-[![CI](https://github.com/zhivykh/nbr/actions/workflows/main.yml/badge.svg?branch=main&event=push)](https://github.com/zhivykh/nbr/actions/workflows/main.yml)
+[![CI](https://github.com/zhivykh/nbr/workflows/CI/badge.svg)](https://github.com/zhivykh/nbr/actions/workflows/main.yml)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
