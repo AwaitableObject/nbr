@@ -4,16 +4,18 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-        "pip install poetry"
-        "make install"
-        "source .venv/bin/activate"
-        "make lint"
+      - name: lint
+        run: |
+          "pip install poetry"
+          "make install"
+          "source .venv/bin/activate"
+          "make lint"
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-        "pip install poetry"
-        "make install"
-        "source .venv/bin/activate"
-        "make test"
+      - name: test
+        run: |
+          "pip install poetry"
+          "make install"
+          "source .venv/bin/activate"
+          "make test"
