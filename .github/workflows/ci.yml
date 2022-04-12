@@ -9,13 +9,12 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Install poetry
-        run: pipx install poetry
+        run: pip install poetry
       - uses: actions/setup-python@v3
         with:
           python-version: '3.10'
           cache: 'poetry'
-      - run: poetry install
       - name: Intall dependencies
         run: poetry install
       - name: Lint
-        run: make lint
+        run: pylint app test
