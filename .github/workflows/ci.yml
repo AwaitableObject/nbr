@@ -14,9 +14,7 @@ jobs:
           architecture: 'x64'
       - name: Install Poetry
         run: pip install poetry
-      - name: Install dependencies
-        run: source .venv/bin/activate
-      - name: Activate enviroment
-        run: poetry shell
+      - name: Intall dependencies
+        run: poetry install
       - name: Lint
         run: make lint
