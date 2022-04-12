@@ -9,10 +9,11 @@ repository = "https://github.com/zhivykh/nbr"
 keywords = ["jupyter"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 websockets = "^10.2"
 pydantic = "^1.9.0"
 httpx = "^0.22.0"
+nbformat = "^5.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
