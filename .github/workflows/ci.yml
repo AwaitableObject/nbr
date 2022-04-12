@@ -17,4 +17,4 @@ jobs:
       - name: Intall dependencies
         run: poetry install
       - name: Lint
-        run: pylint app test
+        run: poetry run pylint app test
