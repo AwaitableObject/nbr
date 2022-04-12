@@ -7,18 +7,16 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: lint
-        run: |
-          "pip install poetry"
-          "make install"
-          "source .venv/bin/activate"
-          "make lint"
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: test
-        run: |
-          "pip install poetry"
-          "make install"
-          "source .venv/bin/activate"
-          "make test"
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: Install Poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: make install
+      - name: Activate enviroment
+        run: poetry shell
+      - name: Lint
+        run: make lint
