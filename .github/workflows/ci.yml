@@ -4,7 +4,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      run: |
+      - run: |
         "pip install poetry"
         "make install"
         "source .venv/bin/activate"
@@ -12,7 +12,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      run: |
+      - run: |
         "pip install poetry"
         "make install"
         "source .venv/bin/activate"
