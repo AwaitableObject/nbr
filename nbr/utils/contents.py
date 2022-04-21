@@ -2,7 +2,6 @@ from typing import Dict
 
 from httpx import AsyncClient
 
-from nbr.config import config
 from nbr.exceptions import InvalidPathException
 
 

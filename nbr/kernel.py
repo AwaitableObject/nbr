@@ -9,7 +9,7 @@ from nbr.schemas.message import Content
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.client import create_client
 from nbr.utils.message import connect_websocket, create_message
-from nbr.utils.sessions import create_session, delete_session
+from nbr.utils.session import create_session, delete_session
 
 
 class KernelDriver:
@@ -45,12 +45,14 @@ class KernelDriver:
                 "execute_input",
                 "stream",
             ]:
-                print(content)
+                pass
 
-            if "execution_count" in content:
-                if content["execution_count"] == self._cells_count:
-                    await self.stop()
-                    break
+            if (
+                "execution_count" in content
+                and content["execution_count"] == self._cells_count
+            ):
+                await self.stop()
+                break
 
             if "status" in content and content["status"] == "aborted":
                 await self.stop()
