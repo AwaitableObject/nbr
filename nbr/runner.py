@@ -2,7 +2,10 @@ from enum import Enum
 from types import TracebackType
 from typing import Callable, Dict, List, Optional, Type, TypeVar
 
+from httpx import AsyncClient
+
 from nbr.schemas.result import RunResult
+from nbr.utils.client import create_client
 
 TNotebookRunner = TypeVar("TNotebookRunner", bound="NotebookRunner")
 
@@ -23,7 +26,7 @@ class NotebookRunner:
         on_cell_end: Optional[Callable] = None,
         host: str = "127.0.0.1",
         port: int = 8888,
-        token: Optional[str] = None
+        token: Optional[str] = None,
     ) -> None:
         self._state: RunnerState = RunnerState.UNOPENED
         self.token = token
@@ -35,6 +38,11 @@ class NotebookRunner:
         self.on_notebook_end = on_notebook_end
         self.on_cell_start = on_cell_start
         self.on_cell_end = on_cell_end
+
+        self._client: AsyncClient = create_client(
+            base_url=f"http://{self.host}:{self.port}",
+            headers={"Authorization": f"token {self.token}"},
+        )
 
     async def execute(self, *, cells: List[Dict]) -> RunResult:
         pass

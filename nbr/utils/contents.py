@@ -5,9 +5,9 @@ from httpx import AsyncClient
 from nbr.exceptions import InvalidPathException
 
 
-async def get_contents(host: str, port: int, path: str, client: AsyncClient) -> Dict:
+async def get_contents(path: str, client: AsyncClient) -> Dict:
     """Get content by path."""
-    url = f"https://{host}:{port}/contents/{path}"
+    url = f"/contents/{path}"
 
     response = await client.get(url)
 
