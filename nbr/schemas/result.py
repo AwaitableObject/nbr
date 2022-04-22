@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Dict, List
 
 from pydantic import BaseModel
 
@@ -10,4 +11,4 @@ class ExecutionStatus(Enum):
 
 class RunResult(BaseModel):
     status: ExecutionStatus
-    executed_cells: list[dict]
+    executed_cells: List[Dict]
