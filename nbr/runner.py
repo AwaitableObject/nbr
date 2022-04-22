@@ -1,6 +1,6 @@
 from enum import Enum
 from types import TracebackType
-from typing import Callable, Optional, Type, TypeVar
+from typing import Callable, Dict, List, Optional, Type, TypeVar
 
 from nbr.schemas.result import RunResult
 
@@ -36,7 +36,7 @@ class NotebookRunner:
         self.on_cell_start = on_cell_start
         self.on_cell_end = on_cell_end
 
-    async def execute(self, *, cells: list[dict]) -> RunResult:
+    async def execute(self, *, cells: List[Dict]) -> RunResult:
         pass
 
     async def __aenter__(self: TNotebookRunner) -> TNotebookRunner:
