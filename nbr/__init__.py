@@ -1,2 +1,1 @@
-from nbr.config import Config
-from nbr.notebook import JupyterNotebook
+from nbr.runner import NotebookRunner

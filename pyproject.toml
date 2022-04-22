@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nbr"
 version = "0.1.0b"
-description = "Remote jupyter notebooks runner"
+description = "Jupyter notebooks runner"
 authors = ["zhivykh"]
 readme = "README.md"
 homepage = "https://github.com/zhivykh/nbr"
@@ -21,13 +21,17 @@ pylint = "^2.13.0"
 mypy = "^0.942"
 black = "^22.1.0"
 isort = "^5.10.1"
+pylint-print = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = ["C0103", "C0111", "R0903"]
+disable = ["C0103", "C0111", "R0902", "R0903"]
+
+[tool.pylint.MASTER]
+load-plugins = ["pylint_print"]
 
 [tool.mypy]
 check_untyped_defs = true
