@@ -7,7 +7,7 @@ from nbr.exceptions import InvalidPathException
 
 async def get_contents(path: str, client: AsyncClient) -> Dict:
     """Get content by path."""
-    url = f"{config.api_url}/contents/{path}"
+    url = f"/contents/{path}"
 
     response = await client.get(url)
 

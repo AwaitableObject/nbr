@@ -1,1 +1,1 @@
-from nbr.executor import NotebookExecutor
+from nbr.runner import NotebookRunner
