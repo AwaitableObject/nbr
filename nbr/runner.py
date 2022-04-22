@@ -14,9 +14,6 @@ class RunnerState(Enum):
 
 
 class NotebookRunner:
-    host: str
-    port: int
-
     def __init__(
         self,
         *,
@@ -25,11 +22,19 @@ class NotebookRunner:
         on_cell_start: Optional[Callable] = None,
         on_cell_end: Optional[Callable] = None,
         host: str = "127.0.0.1",
-        port=8888,
+        port: int = 8888,
+        token: Optional[str] = None
     ) -> None:
         self._state: RunnerState = RunnerState.UNOPENED
+        self.token = token
+
         self.host: str = host
         self.port: int = port
+
+        self.on_notebook_start = on_notebook_start
+        self.on_notebook_end = on_notebook_end
+        self.on_cell_start = on_cell_start
+        self.on_cell_end = on_cell_end
 
     async def execute(self, *, cells: list[dict]) -> RunResult:
         pass
@@ -46,8 +51,8 @@ class NotebookRunner:
 
     async def __aexit__(
         self,
-        exc_type: Type[BaseException] = None,
-        exc_value: BaseException = None,
-        traceback: TracebackType = None,
+        exc_type: Type[BaseException],
+        exc_value: BaseException,
+        traceback: TracebackType,
     ) -> None:
         self._state = RunnerState.CLOSED

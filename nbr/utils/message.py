@@ -1,7 +1,6 @@
 from typing import Optional, Union
 
 from nbr.schemas.message import Content, Header, Message, Metadata
-from nbr.schemas.session import Session
 
 
 def create_message(
