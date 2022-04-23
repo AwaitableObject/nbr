@@ -32,10 +32,10 @@ class NotebookRunner:
         on_cell_end: Optional[Awaitable[Any]] = None,
         host: str = "127.0.0.1",
         port: int = 8888,
-        token: Optional[str] = None,
+        token: str = "",
     ) -> None:
         self._state: RunnerState = RunnerState.UNOPENED
-        self.token: Optional[str] = token
+        self.token: str = token
 
         self.notebook: Notebook = notebook
 

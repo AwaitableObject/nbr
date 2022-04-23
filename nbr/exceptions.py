@@ -8,3 +8,7 @@ class NotebookDoesNotExist(Exception):
 
 class SessionExists(Exception):
     """Session name already in use."""
+
+
+class NBFormatModuleNotFound(Exception):
+    """NBFormat module not found."""
