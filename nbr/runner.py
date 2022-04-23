@@ -1,15 +1,16 @@
 from enum import Enum
 from types import TracebackType
-from typing import Any, Awaitable, Dict, List, Optional, Type, TypeVar
+from typing import Any, Awaitable, Optional, Type, TypeVar
 
 from httpx import AsyncClient
 
+from nbr.exceptions import SessionExists
 from nbr.kernel import Kernel
 from nbr.notebook import Notebook
 from nbr.schemas.result import RunResult
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.client import create_client
-from nbr.utils.session import create_session, delete_session
+from nbr.utils.session import create_session, delete_session, get_sessions
 
 TNotebookRunner = TypeVar("TNotebookRunner", bound="NotebookRunner")
 
@@ -31,10 +32,10 @@ class NotebookRunner:
         on_cell_end: Optional[Awaitable[Any]] = None,
         host: str = "127.0.0.1",
         port: int = 8888,
-        token: Optional[str] = None,
+        token: str = "",
     ) -> None:
         self._state: RunnerState = RunnerState.UNOPENED
-        self.token: Optional[str] = token
+        self.token: str = token
 
         self.notebook: Notebook = notebook
 
@@ -54,11 +55,14 @@ class NotebookRunner:
         self._session: Session
         self._kernel: Kernel
 
-    async def execute(self, *, cells: List[Dict]) -> RunResult:
+    async def execute(self) -> RunResult:
+        if self._state != RunnerState.OPENED:
+            raise RuntimeError("Create NotebookRunner instance first.")
+
         if self.on_notebook_start:
             await self.on_notebook_start
 
-        run_result = self._kernel.send(data=cells)
+        run_result = self._kernel.send(data=self.notebook.cells)
 
         if self.on_notebook_finish:
             await self.on_notebook_finish
@@ -68,17 +72,23 @@ class NotebookRunner:
     async def __aenter__(self: TNotebookRunner) -> TNotebookRunner:
         if self._state != RunnerState.UNOPENED:
             raise RuntimeError(
-                "Cannot open a runner instance more than once.",
+                "Cannot create a NotebookRunner instance more than once.",
             )
 
-        self._state = RunnerState.OPENED
+        all_sessions = await get_sessions(client=self._client)
+        for session in all_sessions:
+            if session.name == self.notebook.name:
+                raise SessionExists()
 
-        self._kernel = Kernel()
+        self._state = RunnerState.OPENED
         self._session = await create_session(
             session_data=CreateSession(
                 name=self.notebook.name, path=self.notebook.path
             ),
             client=self._client,
+        )
+        self._kernel = Kernel(
+            base_url=f"{self.host}:{self.port}", session=self._session
         )
 
         return self
@@ -89,5 +99,6 @@ class NotebookRunner:
         exc_value: BaseException,
         traceback: TracebackType,
     ) -> None:
-        await delete_session(session_id=self._session.name, client=self._client)
+        await delete_session(session_id=self._session.id, client=self._client)
+
         self._state = RunnerState.CLOSED
