@@ -14,5 +14,4 @@ async def create_session(
 async def delete_session(*, session_id: str, client: AsyncClient) -> None:
     """Delete session by id."""
     url = f"/sessions/{session_id}"
-
     await client.delete(url)

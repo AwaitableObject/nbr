@@ -5,6 +5,8 @@ from typing import Any, Awaitable, Dict, List, Optional, Type, TypeVar
 from httpx import AsyncClient
 
 from nbr.kernel import Kernel
+from nbr.notebook import Notebook
+from nbr.schemas.result import RunResult
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.client import create_client
 from nbr.utils.session import create_session, delete_session
@@ -22,6 +24,7 @@ class NotebookRunner:
     def __init__(
         self,
         *,
+        notebook: Notebook,
         on_notebook_start: Optional[Awaitable[Any]] = None,
         on_notebook_end: Optional[Awaitable[Any]] = None,
         on_cell_start: Optional[Awaitable[Any]] = None,
@@ -31,7 +34,9 @@ class NotebookRunner:
         token: Optional[str] = None,
     ) -> None:
         self._state: RunnerState = RunnerState.UNOPENED
-        self.token = token
+        self.token: Optional[str] = token
+
+        self.notebook: Notebook = notebook
 
         self.host: str = host
         self.port: int = port
@@ -42,22 +47,23 @@ class NotebookRunner:
         self.on_cell_finish = on_cell_end
 
         self._client: AsyncClient = create_client(
-            base_url=f"http://{self.host}:{self.port}",
+            base_url=f"http://{self.host}:{self.port}/api",
             headers={"Authorization": f"token {self.token}"},
         )
 
         self._session: Session
         self._kernel: Kernel
 
-    async def execute(self, *, cells: List[Dict]) -> None:
+    async def execute(self, *, cells: List[Dict]) -> RunResult:
         if self.on_notebook_start:
             await self.on_notebook_start
 
-        for cell in cells:
-            self._kernel.send(data=cell["source"])
+        run_result = self._kernel.send(data=cells)
 
         if self.on_notebook_finish:
             await self.on_notebook_finish
+
+        return run_result
 
     async def __aenter__(self: TNotebookRunner) -> TNotebookRunner:
         if self._state != RunnerState.UNOPENED:
@@ -69,7 +75,10 @@ class NotebookRunner:
 
         self._kernel = Kernel()
         self._session = await create_session(
-            session_data=CreateSession(name="aboba"), client=self._client
+            session_data=CreateSession(
+                name=self.notebook.name, path=self.notebook.path
+            ),
+            client=self._client,
         )
 
         return self
@@ -80,7 +89,5 @@ class NotebookRunner:
         exc_value: BaseException,
         traceback: TracebackType,
     ) -> None:
-
         await delete_session(session_id=self._session.name, client=self._client)
-
         self._state = RunnerState.CLOSED

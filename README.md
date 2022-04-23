@@ -24,19 +24,22 @@ Execution a local notebook, using a remote server:
 
 
 ```python
-import nbr
-import nbformat
 import asyncio
+from nbr import NotebookRunner, Notebook
+
 
 async def main() -> None:
-    nb_file = nbformat.read("Untitled.ipynb", as_version=4)
-    
-    async with nbr.NotebookRunner(host="127.0.0.1", port=8888) as runner:
-        result = await runner.execute(cells=nb_file.cells)
-        
-        nb_file.cells = result.executed_cells
-        nbformat.write(nb_file, "executed_notebook.ipynb")
-    
+    notebook = Notebook(name="Untitled.ipynb", path="work/Untitled.ipynb")
+
+    async with NotebookRunner(
+        notebook=notebook,
+        host="127.0.0.1",
+        port=8888,
+        token="a30acc5051c2f2687df3a839f9962d797f074691f9597923",
+    ) as runner:
+        await runner.execute()
+
+
 if __name__ == "__main__":
     asyncio.run(main())
 ```

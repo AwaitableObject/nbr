@@ -1,6 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict, List
+
+from nbr.schemas.result import RunResult
 
 
 class Kernel:
-    def send(self, data: Optional[Dict]) -> None:
+    def send(self, data: List[Dict]) -> RunResult:
         pass
