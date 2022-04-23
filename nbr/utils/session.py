@@ -1,6 +1,16 @@
+from typing import List
+
 from httpx import AsyncClient
 
 from nbr.schemas.session import CreateSession, Session
+
+
+async def get_sessions(*, client: AsyncClient) -> List[Session]:
+    """Get all sessions."""
+    response = await client.get("/sessions")
+    all_sessions = [Session(**data) for data in response.json()]
+
+    return all_sessions
 
 
 async def create_session(

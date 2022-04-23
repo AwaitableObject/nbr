@@ -4,3 +4,7 @@ class InvalidPathException(Exception):
 
 class NotebookDoesNotExist(Exception):
     """Notebook file does not exist."""
+
+
+class SessionExists(Exception):
+    """Session name already in use."""
