@@ -1,8 +1,8 @@
 [![CI](https://github.com/zhivykh/nbr/workflows/CI/badge.svg)](https://github.com/zhivykh/nbr/actions/workflows/main.yml)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
 [![Stable Version](https://img.shields.io/pypi/v/nbr?color=blue)](https://pypi.org/project/nbr/)
-[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 # nbr
 NBR lets you **run** local and remote jupyter-notebooks.
@@ -10,14 +10,14 @@ NBR lets you **run** local and remote jupyter-notebooks.
 ## Installation
 In a terminal, run:
 ```
-python3 -m pip install nbr
+pip install nbr
 ```
 
 ## Usage
 
 Launch a Jupyter server:
 ```
-jupyter server --ServerApp.token='' --ServerApp.password='' --ServerApp.disable_check_xsrf=True
+jupyter server
 ```
 
 Execution a local notebook, using a remote server:
