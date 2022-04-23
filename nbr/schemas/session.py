@@ -1,5 +1,4 @@
 from typing import Optional
-from uuid import uuid4
 
 from pydantic import BaseModel
 
@@ -43,5 +42,5 @@ class CreateSession(BaseModel):
 
     kernel: KernelName = KernelName()
     name: str
-    path: str = uuid4().hex
+    path: str
     type: str = "notebook"

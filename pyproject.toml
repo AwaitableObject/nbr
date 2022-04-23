@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "nbr"
-version = "0.1.0b"
+version = "0.0.1b"
 description = "Jupyter notebooks runner"
-authors = ["zhivykh"]
+authors = ["Nick Zhivykh"]
 readme = "README.md"
 homepage = "https://github.com/zhivykh/nbr"
 repository = "https://github.com/zhivykh/nbr"
-keywords = ["jupyter"]
+keywords = ["jupyter", "jupyter-notebook"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -45,7 +45,6 @@ addopts = "--cov=app --cov-fail-under=60"
 python_files = "test_*.py"
 python_classes = ["*Test", "Test*"]
 python_functions = "test__*"
-
 
 [tool.pylint.master]
 extension-pkg-allow-list = ["pydantic"]
