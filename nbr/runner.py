@@ -56,6 +56,9 @@ class NotebookRunner:
         self._kernel: Kernel
 
     async def execute(self) -> RunResult:
+        if self._state != RunnerState.OPENED:
+            raise RuntimeError("Create NotebookRunner instance first.")
+
         if self.on_notebook_start:
             await self.on_notebook_start
 
@@ -69,7 +72,7 @@ class NotebookRunner:
     async def __aenter__(self: TNotebookRunner) -> TNotebookRunner:
         if self._state != RunnerState.UNOPENED:
             raise RuntimeError(
-                "Cannot open a runner instance more than once.",
+                "Cannot create a NotebookRunner instance more than once.",
             )
 
         all_sessions = await get_sessions(client=self._client)
@@ -78,13 +81,14 @@ class NotebookRunner:
                 raise SessionExists()
 
         self._state = RunnerState.OPENED
-        self._kernel = Kernel()
-
         self._session = await create_session(
             session_data=CreateSession(
                 name=self.notebook.name, path=self.notebook.path
             ),
             client=self._client,
+        )
+        self._kernel = Kernel(
+            base_url=f"{self.host}:{self.port}", session=self._session
         )
 
         return self
@@ -96,4 +100,5 @@ class NotebookRunner:
         traceback: TracebackType,
     ) -> None:
         await delete_session(session_id=self._session.id, client=self._client)
+
         self._state = RunnerState.CLOSED
