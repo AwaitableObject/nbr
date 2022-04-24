@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from nbr.exceptions import NBFormatModuleNotFound
-from nbr.utils.client import create_client
+from nbr.utils.client import create_client, prepare_headers
 from nbr.utils.contents import get_contents
 
 
@@ -20,7 +20,8 @@ class Notebook:
         token: str = "",
     ) -> "Notebook":
         client = create_client(
-            base_url=f"{host}:{port}", headers={"Authorization": f"token {token}"}
+            base_url=f"http://{host}:{port}/api",
+            headers=prepare_headers(token),
         )
         notebook_name = path.split("/")[-1]
         notebook = cls(name=notebook_name, path=path)
@@ -44,5 +45,10 @@ class Notebook:
 
         return notebook
 
-    def dict(self) -> List[Dict]:
-        return self.cells
+    def dict(self) -> Dict:
+        return {
+            "cells": self.cells,
+            "metadata": {"language_info": {"name": "python"}},
+            "nbformat": 4,
+            "nbformat_minor": 2,
+        }
