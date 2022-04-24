@@ -29,15 +29,16 @@ from nbr import NotebookRunner, Notebook
 
 
 async def main() -> None:
-    notebook = Notebook(name="Untitled.ipynb", path="work/Untitled.ipynb")
+    notebook = Notebook.read_file(name="Untitled.ipynb")
 
     async with NotebookRunner(
         notebook=notebook,
         host="127.0.0.1",
         port=8888,
-        token="a30acc5051c2f2687df3a839f9962d797f074691f9597923",
+        token="481145d4be3c79620c23e2bb4e5b818a3669c4e88ea75c35",
     ) as runner:
-        await runner.execute()
+        result = await runner.execute_all_cells()
+        print(result.status)
 
 
 if __name__ == "__main__":
