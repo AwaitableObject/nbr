@@ -27,9 +27,7 @@ from nbr import JupyterAPI, Notebook, NotebookRunner
 
 async def main() -> None:
     jupyter_api = JupyterAPI(token="481145d4be3c79620c23e2bb4e5b818a3669c4e88ea75c35")
-    notebook = await Notebook.read_remote(
-        path="work/Untitled.ipynb", jupyter_api=jupyter_api
-    )
+    notebook = await Notebook.read_file(path="Untitled.ipynb")
 
     async with NotebookRunner(notebook=notebook, jupyter_api=jupyter_api) as runner:
         result = await runner.execute_all_cells()

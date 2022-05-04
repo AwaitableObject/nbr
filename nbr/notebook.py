@@ -12,6 +12,17 @@ class Notebook:
         self.path = path
         self.cells: List[Dict] = []
 
+        self._remote: bool = False
+
+    def save(self, path: str) -> None:
+        if not self._remote:
+            try:
+                import nbformat
+            except ImportError as exc:
+                raise NBFormatModuleNotFound("nbformat module required") from exc
+
+            nbformat.write(self.dict(), path)
+
     @classmethod
     async def read_remote(
         cls, path: str, jupyter_api: JupyterAPI = JupyterAPI()
@@ -26,18 +37,21 @@ class Notebook:
         nb_content = await get_contents(path=path, client=client)
         notebook.cells = nb_content["content"]["cells"]
 
+        notebook._remote = True
+
         return notebook
 
     @classmethod
-    def read_file(cls, file_name: str) -> "Notebook":
+    def read_file(cls, path: str) -> "Notebook":
         try:
             import nbformat
         except ImportError as exc:
             raise NBFormatModuleNotFound("nbformat module required") from exc
 
-        nb_file = nbformat.read(file_name, as_version=4)
+        nb_file = nbformat.read(path, as_version=4)
+        notebook_name = path.split("/")[-1]
 
-        notebook = cls(name=file_name, path=f"work/{file_name}")
+        notebook = cls(name=notebook_name, path=path)
         notebook.cells = nb_file.cells
 
         return notebook
