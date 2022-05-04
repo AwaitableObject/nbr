@@ -30,6 +30,6 @@ jobs:
           python-version: '3.10'
           cache: 'poetry'
       - name: Intall dependencies
-        run: poetry install
+        run: poetry install -E nbformat
       - name: Test
         run: poetry run pytest tests
