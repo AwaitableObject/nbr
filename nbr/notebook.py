@@ -1,7 +1,8 @@
 from typing import Dict, List
 
+import nbformat
+
 from nbr.api import JupyterAPI
-from nbr.exceptions import NBFormatModuleNotFound
 from nbr.utils.client import create_client, prepare_headers
 from nbr.utils.contents import get_contents
 
@@ -16,11 +17,6 @@ class Notebook:
 
     def save(self, path: str) -> None:
         if not self._remote:
-            try:
-                import nbformat
-            except ImportError as exc:
-                raise NBFormatModuleNotFound("nbformat module required") from exc
-
             nbformat.write(self.dict(), path)
 
     @classmethod
@@ -43,11 +39,6 @@ class Notebook:
 
     @classmethod
     def read_file(cls, path: str) -> "Notebook":
-        try:
-            import nbformat
-        except ImportError as exc:
-            raise NBFormatModuleNotFound("nbformat module required") from exc
-
         nb_file = nbformat.read(path, as_version=4)
         notebook_name = path.split("/")[-1]
 

@@ -31,7 +31,5 @@ jobs:
           cache: 'poetry'
       - name: Intall dependencies
         run: poetry install
-      - name: Install nbformat
-        run: poetry add nbformat
       - name: Test
         run: poetry run pytest tests
