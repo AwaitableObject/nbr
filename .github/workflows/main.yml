@@ -12,7 +12,7 @@ jobs:
         run: pip install poetry
       - uses: actions/setup-python@v3
         with:
-          python-version: '3.10'
+          python-version: 3.10
           cache: 'poetry'
       - name: Intall dependencies
         run: poetry install
@@ -23,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Install poetry
-        run: pip install poetry
       - uses: actions/setup-python@v3
         with:
-          python-version: '3.10'
+          python-version: 3.10
           cache: 'poetry'
+      - name: Install poetry
+        run: pip install poetry
       - name: Intall dependencies
         run: poetry install
       - name: Test

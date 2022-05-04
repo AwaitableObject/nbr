@@ -4,10 +4,12 @@ from unittest.mock import AsyncMock, patch
 from nbr.notebook import Notebook
 from tests.utils import read_json
 
+CWD = os.getcwd()
+
 
 def test__notebook_read_file() -> None:
     notebook_name = "test_nb.ipynb"
-    path = f"{os.getcwd()}/tests/notebooks/{notebook_name}"
+    path = f"{CWD}/tests/notebooks/{notebook_name}"
 
     nb = Notebook.read_file(path=path)
 
