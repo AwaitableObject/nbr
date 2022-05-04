@@ -22,6 +22,7 @@ mypy = "^0.942"
 black = "^22.1.0"
 isort = "^5.10.1"
 pylint-print = "^1.0.0"
+pytest-asyncio = "^0.18.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -48,3 +49,6 @@ python_functions = "test__*"
 
 [tool.pylint.master]
 extension-pkg-allow-list = ["pydantic"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

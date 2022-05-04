@@ -6,11 +6,8 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@master
       - name: Install poetry
         run: pip install poetry
       - uses: actions/setup-python@v3
@@ -24,11 +21,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@master
       - name: Install poetry
         run: pip install poetry
       - uses: actions/setup-python@v3

@@ -15,6 +15,10 @@ class Notebook:
 
         self._remote: bool = False
 
+    @property
+    def is_remote(self) -> bool:
+        return self._remote
+
     def save(self, path: str) -> None:
         if not self._remote:
             nbformat.write(self.dict(), path)

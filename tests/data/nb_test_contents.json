@@ -1,0 +1,16 @@
+{
+    "name": "test_nb.ipynb",
+    "path": "work/test_nb.ipynb",
+    "content": {
+        "cells": [
+            {
+                "cell_type": "code",
+                "execution_count": null,
+                "outputs": [],
+                "source": "print('test notebook')"
+            }
+        ]
+    },
+    "format": "json",
+    "type": "notebook"
+}
