@@ -4,6 +4,7 @@ from typing import Any, Awaitable, Optional, Type, TypeVar
 
 from httpx import AsyncClient
 
+from nbr.api import JupyterAPI
 from nbr.exceptions import SessionExists
 from nbr.kernel import Kernel
 from nbr.notebook import Notebook
@@ -28,24 +29,20 @@ class NotebookRunner:
         notebook: Notebook,
         on_notebook_start: Optional[Awaitable[Any]] = None,
         on_notebook_end: Optional[Awaitable[Any]] = None,
-        host: str = "127.0.0.1",
-        port: int = 8888,
-        token: str = "",
+        jupyter_api: JupyterAPI = JupyterAPI(),
     ) -> None:
         self._state: RunnerState = RunnerState.UNOPENED
-        self.token: str = token
 
         self.notebook: Notebook = notebook
-
-        self.host: str = host
-        self.port: int = port
 
         self.on_notebook_start = on_notebook_start
         self.on_notebook_finish = on_notebook_end
 
+        self.jupyter_api = jupyter_api
+
         self._client: AsyncClient = create_client(
-            base_url=f"http://{self.host}:{self.port}/api",
-            headers=prepare_headers(token),
+            base_url=f"http://{self.jupyter_api.host}:{self.jupyter_api.port}/api",
+            headers=prepare_headers(self.jupyter_api.token),
         )
 
         self._session: Session
@@ -84,7 +81,9 @@ class NotebookRunner:
             client=self._client,
         )
         self._kernel = Kernel(session=self._session)
-        await self._kernel.start(base_url=f"{self.host}:{self.port}/api")
+        await self._kernel.start(
+            base_url=f"{self.jupyter_api.host}:{self.jupyter_api.port}/api"
+        )
 
         return self
 

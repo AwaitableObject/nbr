@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from nbr.api import JupyterAPI
 from nbr.exceptions import NBFormatModuleNotFound
 from nbr.utils.client import create_client, prepare_headers
 from nbr.utils.contents import get_contents
@@ -13,15 +14,11 @@ class Notebook:
 
     @classmethod
     async def read_remote(
-        cls,
-        path: str,
-        host: str = "127.0.0.1",
-        port: int = 8888,
-        token: str = "",
+        cls, path: str, jupyter_api: JupyterAPI = JupyterAPI()
     ) -> "Notebook":
         client = create_client(
-            base_url=f"http://{host}:{port}/api",
-            headers=prepare_headers(token),
+            base_url=f"http://{jupyter_api.host}:{jupyter_api.host}/api",
+            headers=prepare_headers(jupyter_api.token),
         )
         notebook_name = path.split("/")[-1]
         notebook = cls(name=notebook_name, path=path)

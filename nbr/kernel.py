@@ -45,7 +45,9 @@ class Kernel:
                 break
 
     async def start(self, base_url: str) -> None:
-        self._websocket = await connect_websocket(base_url=base_url, session=self._session)
+        self._websocket = await connect_websocket(
+            base_url=base_url, session=self._session
+        )
         self._channel_tasks.append(asyncio.create_task(self.listen_server()))
 
     async def _stop(self) -> None:
