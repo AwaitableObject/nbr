@@ -25,18 +25,17 @@ Execution a local notebook, using a remote server:
 
 ```python
 import asyncio
-from nbr import NotebookRunner, Notebook
+
+from nbr import JupyterAPI, Notebook, NotebookRunner
 
 
 async def main() -> None:
-    notebook = Notebook.read_file(name="Untitled.ipynb")
+    jupyter_api = JupyterAPI(token="481145d4be3c79620c23e2bb4e5b818a3669c4e88ea75c35")
+    notebook = await Notebook.read_remote(
+        path="work/Untitled.ipynb", jupyter_api=jupyter_api
+    )
 
-    async with NotebookRunner(
-        notebook=notebook,
-        host="127.0.0.1",
-        port=8888,
-        token="481145d4be3c79620c23e2bb4e5b818a3669c4e88ea75c35",
-    ) as runner:
+    async with NotebookRunner(notebook=notebook, jupyter_api=jupyter_api) as runner:
         result = await runner.execute_all_cells()
         print(result.status)
 
