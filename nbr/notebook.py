@@ -21,7 +21,7 @@ class Notebook:
 
     def save(self, path: str) -> None:
         if not self._remote:
-            nbformat.write(self.dict(), path)
+            nbformat.write(nbformat.NotebookNode(self.dict()), path)
 
     @classmethod
     async def read_remote(

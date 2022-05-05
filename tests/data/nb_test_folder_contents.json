@@ -1,0 +1,25 @@
+{
+    "path": "work",
+    "content": [
+        {
+            "name": "evaluated",
+            "path": "work/evaluated",
+            "content": null,
+            "type": "directory"
+        },
+        {
+            "name": "test.ipynb",
+            "path": "work/test.ipynb",
+            "content": null,
+            "type": "notebook"
+        },
+        {
+            "name": "test2.ipynb",
+            "path": "work/test2.ipynb",
+            "content": null,
+            "type": "notebook"
+        }
+    ],
+    "format": "json",
+    "type": "directory"
+}
