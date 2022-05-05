@@ -13,10 +13,7 @@ python = "^3.10"
 websockets = "^10.2"
 pydantic = "^1.9.0"
 httpx = "^0.22.0"
-nbformat = {version = "^5.3.0", optional = true}
-
-[tool.poetry.extras]
-nbformat = ["nbformat"]
+nbformat = "^5.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
@@ -25,6 +22,7 @@ mypy = "^0.942"
 black = "^22.1.0"
 isort = "^5.10.1"
 pylint-print = "^1.0.0"
+pytest-asyncio = "^0.18.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -51,3 +49,6 @@ python_functions = "test__*"
 
 [tool.pylint.master]
 extension-pkg-allow-list = ["pydantic"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
