@@ -9,6 +9,10 @@ help: ## Show help
 test: ## Run tests
 	$(TEST)
 
+test-cov: ## Run tests with coverage report
+	$(TEST) --cov
+
+
 lint: ## Lint code
 	pylint $(CODE)
 	mypy $(CODE)

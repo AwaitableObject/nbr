@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from httpx import codes
 from httpx._models import Response
 
 import nbr.utils.contents as contents_module
@@ -37,7 +38,7 @@ async def test__open_notebook() -> None:
 
 async def test_invalid_path() -> None:
     client = AsyncMock()
-    client.get.return_value = Response(status_code=404)
+    client.get.return_value = Response(status_code=codes.NOT_FOUND)
 
     with pytest.raises(InvalidPathException):
         await contents_module.get_contents(path="invalid_path", client=client)

@@ -1,0 +1,17 @@
+{
+    "id": "test_session_id",
+    "path": "work/test_nb.ipynb",
+    "name": "test_nb.ipynb",
+    "type": "notebook",
+    "kernel": {
+        "id": "test_kerkel_id",
+        "name": "python3",
+        "last_activity": "2022-05-06T14:34:14.718254Z",
+        "execution_state": "idle",
+        "connections": 1
+    },
+    "notebook": {
+        "path": "work/test_nb.ipynb",
+        "name": "test_nb.ipynb"
+    }
+}
