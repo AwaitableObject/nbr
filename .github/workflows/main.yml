@@ -31,7 +31,7 @@ jobs:
       - name: Intall dependencies
         run: poetry install
       - name: Test
-        run: poetry run pytest tests
+        run: poetry run pytest tests --cov
       - name: Coverage
         run: poetry run coverage xml -o coverage.xml
       - name: Upload coverage to Codecov
