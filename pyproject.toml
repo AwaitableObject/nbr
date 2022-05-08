@@ -23,6 +23,7 @@ black = "^22.1.0"
 isort = "^5.10.1"
 pylint-print = "^1.0.0"
 pytest-asyncio = "^0.18.3"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
