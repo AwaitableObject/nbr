@@ -33,6 +33,6 @@ jobs:
       - name: Test
         run: poetry run pytest tests
       - name: Coverage
-        run: coverage xml -o coverage.xml
+        run: poetry run coverage xml -o coverage.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
