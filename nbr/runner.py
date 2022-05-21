@@ -5,13 +5,12 @@ from typing import Any, Awaitable, Optional, Type, TypeVar
 from httpx import AsyncClient
 
 from nbr.api import JupyterAPI
-from nbr.exceptions import SessionExists
 from nbr.kernel import Kernel
 from nbr.notebook import Notebook
 from nbr.schemas.result import RunResult
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.client import create_client, prepare_headers
-from nbr.utils.session import create_session, delete_session, get_sessions
+from nbr.utils.session import create_session, delete_session
 
 TNotebookRunner = TypeVar("TNotebookRunner", bound="NotebookRunner")
 
@@ -56,6 +55,7 @@ class NotebookRunner:
             await self.on_notebook_start
 
         run_result = await self._kernel.execute(cells=self.notebook.cells)
+        self.notebook.cells = run_result.cells
 
         if self.on_notebook_finish:
             await self.on_notebook_finish
@@ -67,11 +67,6 @@ class NotebookRunner:
             raise RuntimeError(
                 "Cannot create a NotebookRunner instance more than once.",
             )
-
-        all_sessions = await get_sessions(client=self._client)
-        for session in all_sessions:
-            if session.name == self.notebook.name and not session.kernel.connections:
-                raise SessionExists("Session with same name already exists")
 
         self._state = RunnerState.OPENED
         self._session = await create_session(

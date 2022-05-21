@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import List
 
+import nbformat
 from websockets.legacy.client import WebSocketClientProtocol
 
 from nbr.schemas.message import Content
@@ -19,7 +20,9 @@ class Kernel:
         self._channel_tasks: List[asyncio.Task] = []
 
         self._status: ExecutionStatus = ExecutionStatus.SUCCESS
-        self._cells_count: int
+
+        self._cells: List
+        self._current_cell: int
 
     async def listen_server(self) -> None:
         """Listen server messages."""
@@ -29,9 +32,22 @@ class Kernel:
             msg_json = json.loads(msg)
             content = msg_json["content"]
 
+            if "data" in content:
+                content["output_type"] = "execute_result"
+                self._cells[self._current_cell].outputs = [
+                    nbformat.NotebookNode(content)
+                ]
+
+            if "status" in content:
+                self._cells[self._current_cell]["execution_count"] = (
+                    self._current_cell + 1
+                )
+                self._current_cell += 1
+
             if (
-                "execution_count" in content
-                and content["execution_count"] == self._cells_count
+                "status" in content
+                and "execution_count" in content
+                and content["execution_count"] == len(self._cells)
             ):
                 self._status = ExecutionStatus.SUCCESS
 
@@ -54,9 +70,9 @@ class Kernel:
         self._channel_tasks[-1].cancel()
         await self._websocket.close()
 
-    async def execute(self, cells: List) -> RunResult:
-
-        self._cells_count = len(cells)
+    async def execute(self, cells: List[nbformat.NotebookNode]) -> RunResult:
+        self._cells = cells
+        self._current_cell = 0
 
         for cell in cells:
             code = cell["source"]
@@ -73,4 +89,4 @@ class Kernel:
 
         await asyncio.gather(*self._channel_tasks)
 
-        return RunResult(status=self._status)
+        return RunResult(status=self._status, cells=self._cells)

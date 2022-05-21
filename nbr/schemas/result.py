@@ -1,5 +1,7 @@
 from enum import Enum
+from typing import List
 
+import nbformat
 from pydantic import BaseModel
 
 
@@ -10,3 +12,4 @@ class ExecutionStatus(Enum):
 
 class RunResult(BaseModel):
     status: ExecutionStatus
+    cells: List[nbformat.NotebookNode]
