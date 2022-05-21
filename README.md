@@ -26,19 +26,19 @@ Execution a local notebook, using a remote server:
 
 ```python
 import asyncio
-
-from nbr import JupyterAPI, Notebook, NotebookRunner
+from nbr import NotebookRunner, Notebook, JupyterAPI, ExecutionStatus
 
 
 async def main() -> None:
-    jupyter_api = JupyterAPI(token="481145d4be3c79620c23e2bb4e5b818a3669c4e88ea75c35")
-    notebook = await Notebook.read_file(path="Untitled.ipynb")
+    jupyter_api = JupyterAPI()
+    notebook = Notebook.read_file(path="Untitled.ipynb")
 
     async with NotebookRunner(notebook=notebook, jupyter_api=jupyter_api) as runner:
         result = await runner.execute_all_cells()
-        print(result.status)
 
-
+        if result.status == ExecutionStatus.SUCCESS:
+            notebook.save(path="Executed.ipynb")
+    
 if __name__ == "__main__":
     asyncio.run(main())
 ```

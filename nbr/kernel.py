@@ -8,7 +8,6 @@ from websockets.legacy.client import WebSocketClientProtocol
 from nbr.schemas.message import Content
 from nbr.schemas.result import ExecutionStatus, RunResult
 from nbr.schemas.session import Session
-from nbr.utils.execution import KernelState
 from nbr.utils.message import create_message
 from nbr.utils.websocket import connect_websocket
 
@@ -21,7 +20,6 @@ class Kernel:
         self._channel_tasks: List[asyncio.Task] = []
 
         self._status: ExecutionStatus = ExecutionStatus.SUCCESS
-        self._state: KernelState
 
         self._cells: List
         self._current_cell: int
@@ -75,8 +73,6 @@ class Kernel:
     async def execute(self, cells: List[nbformat.NotebookNode]) -> RunResult:
         self._cells = cells
         self._current_cell = 0
-
-        self._state = KernelState(state="idle")
 
         for cell in cells:
             code = cell["source"]
