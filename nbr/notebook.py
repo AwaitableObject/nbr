@@ -11,7 +11,7 @@ class Notebook:
     def __init__(self, *, name: str, path: str) -> None:
         self.name = name
         self.path = path
-        self.cells: List[Dict] = []
+        self.cells: List[nbformat.NotebookNode] = []
 
         self._remote: bool = False
 

@@ -5,13 +5,12 @@ from typing import Any, Awaitable, Optional, Type, TypeVar
 from httpx import AsyncClient
 
 from nbr.api import JupyterAPI
-from nbr.exceptions import SessionExists
 from nbr.kernel import Kernel
 from nbr.notebook import Notebook
 from nbr.schemas.result import RunResult
 from nbr.schemas.session import CreateSession, Session
 from nbr.utils.client import create_client, prepare_headers
-from nbr.utils.session import create_session, delete_session, get_sessions
+from nbr.utils.session import create_session, delete_session
 
 TNotebookRunner = TypeVar("TNotebookRunner", bound="NotebookRunner")
 

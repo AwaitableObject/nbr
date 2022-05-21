@@ -2,14 +2,15 @@ import asyncio
 import json
 from typing import List
 
+import nbformat
 from websockets.legacy.client import WebSocketClientProtocol
 
 from nbr.schemas.message import Content
 from nbr.schemas.result import ExecutionStatus, RunResult
 from nbr.schemas.session import Session
+from nbr.utils.execution import KernelState
 from nbr.utils.message import create_message
 from nbr.utils.websocket import connect_websocket
-from nbr.utils.execution import KernelState
 
 
 class Kernel:
@@ -21,7 +22,7 @@ class Kernel:
 
         self._status: ExecutionStatus = ExecutionStatus.SUCCESS
         self._state: KernelState
-        
+
         self._cells: List
         self._current_cell: int
 
@@ -34,7 +35,16 @@ class Kernel:
             content = msg_json["content"]
 
             if "data" in content:
-                self._cells[self._current_cell]["outputs"] = content
+                content["output_type"] = "execute_result"
+                self._cells[self._current_cell].outputs = [
+                    nbformat.NotebookNode(content)
+                ]
+
+            if "status" in content:
+                self._cells[self._current_cell]["execution_count"] = (
+                    self._current_cell + 1
+                )
+                self._current_cell += 1
 
             if (
                 "status" in content
@@ -51,7 +61,6 @@ class Kernel:
 
                 await self._stop()
                 break
-                
 
     async def start(self, base_url: str) -> None:
         self._websocket = await connect_websocket(
@@ -63,7 +72,7 @@ class Kernel:
         self._channel_tasks[-1].cancel()
         await self._websocket.close()
 
-    async def execute(self, cells: List) -> RunResult:
+    async def execute(self, cells: List[nbformat.NotebookNode]) -> RunResult:
         self._cells = cells
         self._current_cell = 0
 
@@ -83,5 +92,5 @@ class Kernel:
             await self._websocket.send(message)
 
         await asyncio.gather(*self._channel_tasks)
-        print(self._cells)
+
         return RunResult(status=self._status, cells=self._cells)
