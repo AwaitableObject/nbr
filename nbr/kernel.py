@@ -9,6 +9,7 @@ from nbr.schemas.result import ExecutionStatus, RunResult
 from nbr.schemas.session import Session
 from nbr.utils.message import create_message
 from nbr.utils.websocket import connect_websocket
+from nbr.utils.execution import KernelState
 
 
 class Kernel:
@@ -19,7 +20,10 @@ class Kernel:
         self._channel_tasks: List[asyncio.Task] = []
 
         self._status: ExecutionStatus = ExecutionStatus.SUCCESS
-        self._cells_count: int
+        self._state: KernelState
+        
+        self._cells: List
+        self._current_cell: int
 
     async def listen_server(self) -> None:
         """Listen server messages."""
@@ -29,9 +33,13 @@ class Kernel:
             msg_json = json.loads(msg)
             content = msg_json["content"]
 
+            if "data" in content:
+                self._cells[self._current_cell]["outputs"] = content
+
             if (
-                "execution_count" in content
-                and content["execution_count"] == self._cells_count
+                "status" in content
+                and "execution_count" in content
+                and content["execution_count"] == len(self._cells)
             ):
                 self._status = ExecutionStatus.SUCCESS
 
@@ -43,6 +51,7 @@ class Kernel:
 
                 await self._stop()
                 break
+                
 
     async def start(self, base_url: str) -> None:
         self._websocket = await connect_websocket(
@@ -55,8 +64,10 @@ class Kernel:
         await self._websocket.close()
 
     async def execute(self, cells: List) -> RunResult:
+        self._cells = cells
+        self._current_cell = 0
 
-        self._cells_count = len(cells)
+        self._state = KernelState(state="idle")
 
         for cell in cells:
             code = cell["source"]
@@ -72,5 +83,5 @@ class Kernel:
             await self._websocket.send(message)
 
         await asyncio.gather(*self._channel_tasks)
-
-        return RunResult(status=self._status)
+        print(self._cells)
+        return RunResult(status=self._status, cells=self._cells)
