@@ -1,5 +1,7 @@
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+# type: ignore
+from unittest.mock import AsyncMock, patch
+
+from nbformat import NotebookNode
 
 from nbr.kernel import Kernel
 from nbr.schemas.result import ExecutionStatus
@@ -58,6 +60,6 @@ async def test__kernel_execute() -> None:
     assert len(result.cells) == 0
 
     kernel._status = ExecutionStatus.SUCCESS
-    result = await kernel.execute(cells=[{"source": "2 + 2"}])
+    result = await kernel.execute(cells=[NotebookNode({"source": "2 + 2"})])
     assert result.status == ExecutionStatus.SUCCESS
     assert len(result.cells) == 1
