@@ -15,10 +15,3 @@ async def get_contents(path: str, client: AsyncClient) -> Dict:
         raise InvalidPathException(f"No such file or directory: {path}")
 
     return response.json()
-
-
-async def create_empty_notebook(path: str, client: AsyncClient) -> None:
-    data = {"name": path, "type": "notebook"}
-    url = "/contents"
-
-    await client.post(url=url, data=data)

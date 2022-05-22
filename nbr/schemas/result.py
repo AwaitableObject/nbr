@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class ExecutionStatus(Enum):
     SUCCESS = "success"
     ERROR = "error"
+    WAITING = "waiting"
 
 
 class RunResult(BaseModel):
