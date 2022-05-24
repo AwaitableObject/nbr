@@ -15,11 +15,10 @@ from nbr.utils.websocket import connect_websocket
 class Kernel:
     def __init__(self, *, session: Session) -> None:
         self._session: Session = session
+        self._channel_tasks: List[asyncio.Task] = []
+        self._status: ExecutionStatus = ExecutionStatus.WAITING
 
         self._websocket: WebSocketClientProtocol
-        self._channel_tasks: List[asyncio.Task] = []
-
-        self._status: ExecutionStatus = ExecutionStatus.SUCCESS
 
         self._cells: List
         self._current_cell: int
