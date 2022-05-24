@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nbr"
-version = "0.0.2b"
+version = "1.0.0b"
 description = "Jupyter notebooks runner"
 authors = ["Nick Zhivykh"]
 readme = "README.md"
